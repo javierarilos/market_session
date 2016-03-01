@@ -14,7 +14,7 @@ Read a Session, with file format:
             u/U: bid volume
             a/A: ask price
             w/W: ask vol
-""""
+"""
 
 import time
 
@@ -91,6 +91,18 @@ class BookOrder:
                 return
 
     def statusToString(self):
+        """ Status to String in the format, all in a single line:
+            <id>|
+            <timestamp>|
+            nb<nbids>
+            na<nasks>
+            b<bid>
+            [b{0,9}<bid-n>u{0,9}<bidVolume-n>]*
+            [a{0,9}<ask-n>w{0,9}<askVolume-n>]*
+            l<last>
+            v<lastVolume>
+            V<volume>
+        """
         pref = "nb{}na{}".format(self.nbids, self.nasks)
         for idx in range(self.nbids):
             pref += "b{}{}u{}{}".format(idx, self.bidPrices[idx], idx, self.bidVolumes[idx])
