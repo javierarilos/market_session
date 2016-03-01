@@ -1,3 +1,21 @@
+"""
+Read a Session, with file format:
+    First line is date and time:
+        # 20100222 07:55:00
+    Every other line is:
+        iid, offset (in ms since MIDNIGHT), entry
+            e.g.     F:FSTXH0|28641500|l2505v0V0
+        entries:
+            Tick (last): id,offs, l<LAST>v<LASTVOL>V<TOTVOL>
+                F:FESXH0|28797157|l2788v38V5216
+            nb: nbids
+            na: nasks
+            b0, ... b9: bids (B=10+) bid price
+            u/U: bid volume
+            a/A: ask price
+            w/W: ask vol
+""""
+
 import time
 
 
@@ -83,22 +101,6 @@ class BookOrder:
 
     def toString(self):
         return "{}|{}|{}".format(self.id, self.timestamp, self.statusToString())
-#
-# Session file format:
-# First line is date and time:
-#  # 20100222 07:55:00
-# Every other line is:
-# iid, offset (in ms since MIDNIGHT), entry
-# e.g.     F:FSTXH0|28641500|l2505v0V0
-# entries:
-# Tick (last): id,offs, l<LAST>v<LASTVOL>V<TOTVOL>
-# F:FESXH0|28797157|l2788v38V5216
-# nb: nbids
-# na: nasks
-# b0, ... b9: bids (B=10+) bid price
-# u/U: bid volume
-# a/A: ask price
-# w/W: ask vol
 
 
 def readsession(fn):
