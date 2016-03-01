@@ -115,7 +115,7 @@ class BookOrder:
         return "{}|{}|{}".format(self.id, self.timestamp, self.statusToString())
 
 
-def readsession(fn):
+def readsession(fn, callback=None):
     f = open(fn)
     t0 = 0
 
@@ -136,3 +136,6 @@ def readsession(fn):
             t0 = t
 
         bookOrder.increment(entry, t)
+
+        if callback:
+            callback(iid, bookOrder)
