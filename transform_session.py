@@ -26,7 +26,9 @@ if __name__ == '__main__':
         print('orig_file=({}) is not a valid file.'.format(args.orig_file))
 
     with open(args.dest_file, 'w') as df:
+
         def writesession(iid, bookOrder):
             df.write(bookOrder.statusToString())
             df.write(os.linesep)
-        readsession(args.orig_file,callback=writesession)
+
+        readsession(args.orig_file, callback=writesession)
