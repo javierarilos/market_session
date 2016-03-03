@@ -114,6 +114,27 @@ class BookOrder:
     def toString(self):
         return "{}|{}|{}".format(self.id, self.timestamp, self.statusToString())
 
+    def toList(self):
+        """returns a list:
+            [
+                hash(id), timestamp, nbids, nasks,
+                b0, u0 ..., b20, u29,
+                a0, w0 ..., a29, w29,
+                l, v, V
+            ]
+        """
+        tmp_list = [hash(self.id), self.timestamp, self.nbids, self.nasks]
+        for b, u in zip(self.bidPrices, self.bidVolumes):
+            tmp_list.append(b)
+            tmp_list.append(u)
+        for a, w in zip(self.askPrices, self.askVolumes):
+            tmp_list.append(a)
+            tmp_list.append(w)
+        tmp_list.append(self.lastPrice)
+        tmp_list.append(self.lastVolume)
+        tmp_list.append(self.totalVolume)
+        return tmp_list
+
 
 def readsession(fn, callback=None):
     f = open(fn)

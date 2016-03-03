@@ -10,25 +10,48 @@ import os
 from os import path
 import sys
 
+import numpy as np
+
 from ReadSession import readsession
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=globals()['__doc__'], add_help=True)
-    parser.add_argument('orig_file')
-    parser.add_argument('dest_file')
-
-    args = parser.parse_args()
-
-    print('called with: original={} and destination={}'.format(args.orig_file, args.dest_file))
-
-    if not path.isfile(args.orig_file):
-        print('orig_file=({}) is not a valid file.'.format(args.orig_file))
-
-    with open(args.dest_file, 'w') as df:
+def transform_session_to_file(orig_file, dest_file):
+    with open(dest_file, 'w') as df:
 
         def writesession(iid, bookOrder):
             df.write(bookOrder.statusToString())
             df.write(os.linesep)
 
-        readsession(args.orig_file, callback=writesession)
+        readsession(orig_file, callback=writesession)
+
+
+def add_session_to_list(orig_file, ses_list):
+    def append_orders_to_list(iid, bookOrder):
+        print('bookOrder:', bookOrder.id, bookOrder.lastPrice)
+        ses_list.append(bookOrder.toList())
+
+    readsession(orig_file, callback=append_orders_to_list)
+    return ses
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=globals()['__doc__'], add_help=True)
+    parser.add_argument('orig_file')
+    parser.add_argument('--out', dest='output', default='file', choices=['file', 'numpy'])
+
+    args = parser.parse_args()
+
+    orig_file = args.orig_file
+    dest_file = orig_file+'.out'
+
+    print('called with: original={} and output={}'.format(orig_file, args.output))
+
+    if not path.isfile(orig_file):
+        print('orig_file=({}) is not a valid file.'.format(orig_file))
+
+    if args.output == 'numpy':
+        session_list = []
+        session_list = add_session_to_numpy_arr(orig_file, session_list)
+        numpy.array(session_list)
+    else:
+        transform_session_to_file(orig_file, dest_file)
