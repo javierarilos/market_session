@@ -97,18 +97,18 @@ class BookOrder:
             nb<nbids>
             na<nasks>
             b<bid>
-            [b{0,9}<bid-n>u{0,9}<bidVolume-n>]*
-            [a{0,9}<ask-n>w{0,9}<askVolume-n>]*
-            l<last>
+            l<lastPrice>
             v<lastVolume>
             V<volume>
+            [b{0,9}<bid-n>u{0,9}<bidVolume-n>]*
+            [a{0,9}<ask-n>w{0,9}<askVolume-n>]*
         """
         pref = "nb{}na{}".format(self.nbids, self.nasks)
+        pref += ("l{}v{}V{}".format(self.lastPrice, self.lastVolume, self.totalVolume))
         for idx in range(self.nbids):
             pref += "b{}{}u{}{}".format(idx, self.bidPrices[idx], idx, self.bidVolumes[idx])
         for idx in range(self.nasks):
             pref += "a{}{}w{}{}".format(idx, self.askPrices[idx], idx, self.askVolumes[idx])
-        pref += ("l{}v{}V{}".format(self.lastPrice, self.lastVolume, self.totalVolume))
         return pref
 
     def toString(self):
@@ -118,32 +118,35 @@ class BookOrder:
         """returns a list:
             [
                 hash(id), timestamp, nbids, nasks,
+                l, v, V,
                 b0, u0 ..., b20, u29,
                 a0, w0 ..., a29, w29,
-                l, v, V
             ]
         """
-        tmp_list = [hash(self.id), self.timestamp, self.nbids, self.nasks]
+        tmp_list = [
+                    hash(self.id), self.timestamp, self.nbids, self.nasks,
+                    self.lastPrice, self.lastVolume, self.totalVolume
+        ]
+
         for b, u in zip(self.bidPrices, self.bidVolumes):
             tmp_list.append(b)
             tmp_list.append(u)
         for a, w in zip(self.askPrices, self.askVolumes):
             tmp_list.append(a)
             tmp_list.append(w)
-        tmp_list.append(self.lastPrice)
-        tmp_list.append(self.lastVolume)
-        tmp_list.append(self.totalVolume)
         return tmp_list
 
     def getListNames(self):
-        names = ['id_hash', 'timestamp', 'nbids', 'nasks']
-        for i in range(20):
+        names = [
+                    'id_hash', 'timestamp', 'nbids', 'nasks',
+                    'l', 'v', 'V'
+        ]
+        for i in range(30):
             names.append('b'+str(i))
             names.append('u'+str(i))
-        for i in range(20):
+        for i in range(30):
             names.append('a'+str(i))
             names.append('w'+str(i))
-        names.extend(['l', 'v', 'V'])
         return names
 
 
