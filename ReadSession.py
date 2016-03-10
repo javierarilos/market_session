@@ -135,8 +135,19 @@ class BookOrder:
         tmp_list.append(self.totalVolume)
         return tmp_list
 
+    def getListNames(self):
+        names = ['id_hash', 'timestamp', 'nbids', 'nasks']
+        for i in range(20):
+            names.append('b'+str(i))
+            names.append('u'+str(i))
+        for i in range(20):
+            names.append('a'+str(i))
+            names.append('w'+str(i))
+        names.extend(['l', 'v', 'V'])
+        return names
 
-def readsession(fn, callback=None):
+
+def readsession(fn, callback=None, filter_iid=None):
     f = open(fn)
     t0 = 0
 
@@ -148,15 +159,16 @@ def readsession(fn, callback=None):
             continue
         # Interpret each line
         (iid, offs, entry) = line.split('|')
-        if iid not in instruments:
-            instruments[iid] = BookOrder(iid)
-        bookOrder = instruments[iid]
+        if not filter_iid or (filter_iid and filter_iid == iid):
+            if iid not in instruments:
+                instruments[iid] = BookOrder(iid)
+            bookOrder = instruments[iid]
 
-        t = int(offs)  # in milliseconds
-        if t0 == 0:
-            t0 = t
+            t = int(offs)  # in milliseconds
+            if t0 == 0:
+                t0 = t
 
-        bookOrder.increment(entry, t)
+            bookOrder.increment(entry, t)
 
-        if callback:
-            callback(iid, bookOrder)
+            if callback:
+                callback(iid, bookOrder)
