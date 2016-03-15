@@ -97,25 +97,60 @@ class BookOrder:
             nb<nbids>
             na<nasks>
             b<bid>
-            [b{0,9}<bid-n>u{0,9}<bidVolume-n>]*
-            [a{0,9}<ask-n>w{0,9}<askVolume-n>]*
-            l<last>
+            l<lastPrice>
             v<lastVolume>
             V<volume>
+            [b{0,9}<bid-n>u{0,9}<bidVolume-n>]*
+            [a{0,9}<ask-n>w{0,9}<askVolume-n>]*
         """
         pref = "nb{}na{}".format(self.nbids, self.nasks)
+        pref += ("l{}v{}V{}".format(self.lastPrice, self.lastVolume, self.totalVolume))
         for idx in range(self.nbids):
             pref += "b{}{}u{}{}".format(idx, self.bidPrices[idx], idx, self.bidVolumes[idx])
         for idx in range(self.nasks):
             pref += "a{}{}w{}{}".format(idx, self.askPrices[idx], idx, self.askVolumes[idx])
-        pref += ("l{}v{}V{}".format(self.lastPrice, self.lastVolume, self.totalVolume))
         return pref
 
     def toString(self):
         return "{}|{}|{}".format(self.id, self.timestamp, self.statusToString())
 
+    def toList(self):
+        """returns a list:
+            [
+                hash(id), timestamp, nbids, nasks,
+                l, v, V,
+                b0, u0 ..., b20, u29,
+                a0, w0 ..., a29, w29,
+            ]
+        """
+        tmp_list = [
+                    hash(self.id), self.timestamp, self.nbids, self.nasks,
+                    self.lastPrice, self.lastVolume, self.totalVolume
+        ]
 
-def readsession(fn, callback=None):
+        for b, u in zip(self.bidPrices, self.bidVolumes):
+            tmp_list.append(b)
+            tmp_list.append(u)
+        for a, w in zip(self.askPrices, self.askVolumes):
+            tmp_list.append(a)
+            tmp_list.append(w)
+        return tmp_list
+
+    def getListNames(self):
+        names = [
+                    'id_hash', 'timestamp', 'nbids', 'nasks',
+                    'l', 'v', 'V'
+        ]
+        for i in range(30):
+            names.append('b'+str(i))
+            names.append('u'+str(i))
+        for i in range(30):
+            names.append('a'+str(i))
+            names.append('w'+str(i))
+        return names
+
+
+def readsession(fn, callback=None, filter_iid=None):
     f = open(fn)
     t0 = 0
 
@@ -127,15 +162,16 @@ def readsession(fn, callback=None):
             continue
         # Interpret each line
         (iid, offs, entry) = line.split('|')
-        if iid not in instruments:
-            instruments[iid] = BookOrder(iid)
-        bookOrder = instruments[iid]
+        if not filter_iid or (filter_iid and filter_iid == iid):
+            if iid not in instruments:
+                instruments[iid] = BookOrder(iid)
+            bookOrder = instruments[iid]
 
-        t = int(offs)  # in milliseconds
-        if t0 == 0:
-            t0 = t
+            t = int(offs)  # in milliseconds
+            if t0 == 0:
+                t0 = t
 
-        bookOrder.increment(entry, t)
+            bookOrder.increment(entry, t)
 
-        if callback:
-            callback(iid, bookOrder)
+            if callback:
+                callback(iid, bookOrder)
