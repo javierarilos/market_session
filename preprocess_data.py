@@ -1,5 +1,6 @@
 import cPickle
 import numpy as np
+from sklearn import cross_validation
 
 
 def load_session(session_file):
@@ -28,3 +29,8 @@ def prepare_feats_labels(data, window=10, label_after=10, label_column=4, overla
         feats.append(feature)
         labels.append(label)
     return np.array(feats), np.array(labels)
+
+
+def split_to_training_and_test(feats, labels):
+    splitted = cross_validation.train_test_split(feats, labels, test_size=0.1, random_state=42)
+    return splitted  # feats_train, feats_test, labels_train, labels_test
